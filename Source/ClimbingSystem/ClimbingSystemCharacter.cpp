@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+
 #include "DebugHelper.h"
 
 
@@ -149,5 +150,14 @@ void AClimbingSystemCharacter::Look(const FInputActionValue& Value)
 
 void AClimbingSystemCharacter::OnClimbActionStarted(const FInputActionValue& Value)
 {
-	Debug::Print(TEXT("Climb action Started"));
+	if (!CustomMovementComponent) return;
+
+	if(!CustomMovementComponent->IsClimbing())
+	{
+		CustomMovementComponent->ToggleClimbing(true);
+	}
+	else
+	{
+		CustomMovementComponent->ToggleClimbing(false);
+	}
 }
