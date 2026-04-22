@@ -14,11 +14,24 @@ class CLIMBINGSYSTEM_API UCustomMovementComponent : public UCharacterMovementCom
 {
 	GENERATED_BODY()
 	
+public:
+	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 private:
 #pragma region ClimbTraces
 
 	TArray<FHitResult> DoCapsuleTraceMultiByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false);
+	FHitResult DoLineTraceSingleByObject(const FVector& Start, const FVector& End, bool bShowDebugShape = false);
+
 #pragma endregion
+
+#pragma region ClimbCore
+
+	void TraceClimbableSurfaces();
+
+	void TraceFormEyeHeight(float TraceDistance, float TraceStartOffset = 0.f);
+#pragma endregion
+
 
 #pragma region ClimbVariables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
