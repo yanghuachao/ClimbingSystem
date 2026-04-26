@@ -29,6 +29,7 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	GetShouldMove();
 	GetIsFalling();
 	GetIsClimbing();
+	GetClimbVelocity();
 
 }
 
@@ -58,4 +59,9 @@ void UCharacterAnimInstance::GetIsFalling()
 void UCharacterAnimInstance::GetIsClimbing()
 {
 	bIsClimbing = CustomMovementComponent->IsClimbing();
+}
+
+void UCharacterAnimInstance::GetClimbVelocity()
+{
+	ClimbVelocity = CustomMovementComponent->GetUnrotatedClimbVelocity();
 }
