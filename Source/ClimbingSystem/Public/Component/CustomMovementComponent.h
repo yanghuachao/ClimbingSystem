@@ -65,9 +65,13 @@ private:
 
 	bool CheckShouldStopClimbing();
 
+	bool CheckHasReachedFloor();
+
 	FQuat GetClimbRotatiom(float DeltaTime);
 
 	void SnapMovementToClimbableSurfaces(float DeltaTime);
+
+	bool CheckHasReachedLedge();
 
 	void PlayClimbMontage(UAnimMontage* MontageToPlay);
 

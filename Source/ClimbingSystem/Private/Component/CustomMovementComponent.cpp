@@ -202,7 +202,7 @@ void UCustomMovementComponent::PhysClimb(float deltaTime, int32 Iterations)
 	ProcessClimbableSurfaceInfo();
 
 	/*Check if we should stop climbing*/
-	if(CheckShouldStopClimbing())
+	if(CheckShouldStopClimbing() || CheckHasReachedFloor())
 	{
 		StopClimbing();
 	}
@@ -238,6 +238,15 @@ void UCustomMovementComponent::PhysClimb(float deltaTime, int32 Iterations)
 	}
 	/*Snap movement to climbable surfaces*/
 	SnapMovementToClimbableSurfaces(deltaTime);
+
+	if(CheckHasReachedLedge())
+	{
+		Debug::Print(TEXT("Ledge Reached"), FColor::Green, 1);
+	}
+	else
+	{
+		Debug::Print(TEXT("Ledge Not Reached"), FColor::Red, 1);
+	}
 }
 
 void UCustomMovementComponent::ProcessClimbableSurfaceInfo()
@@ -262,15 +271,63 @@ void UCustomMovementComponent::ProcessClimbableSurfaceInfo()
 
 bool UCustomMovementComponent::CheckShouldStopClimbing()
 {
-	if (ClimbableSurfacesTracedResults.IsEmpty()) return true;
+    if (ClimbableSurfacesTracedResults.IsEmpty()) return true;
+
+    //// 检查是否有有效的可攀爬表面
+    //bool bHasVerticalSurface = false;
+    //
+    //for (const FHitResult& HitResult : ClimbableSurfacesTracedResults)
+    //{
+    //    // 计算表面法线与地面的夹角
+    //    const float DotResult = FVector::DotProduct(HitResult.ImpactNormal, FVector::UpVector);
+    //    const float DegreeDiff = FMath::RadiansToDegrees(FMath::Acos(DotResult));
+    //    
+    //    // 如果夹角大于60度，说明是垂直墙面
+    //    if (DegreeDiff > 60.f)
+    //    {
+    //        bHasVerticalSurface = true;
+    //        break;
+    //    }
+    //}
+    //
+    //// 如果没有检测到垂直墙面，停止攀爬
+    //if (!bHasVerticalSurface)
+    //{
+    //    return true;
+    //}
 
 	const float DotResult = FVector::DotProduct(CurrentClimbableSurfaceNormal, FVector::UpVector);
 	const float DegreeDiff = FMath::RadiansToDegrees(FMath::Acos(DotResult));
-	
-	if(DegreeDiff <= 60.f)
+
+	if (DegreeDiff <= 60.f) { return true; }
+    
+    return false;
+}
+
+bool UCustomMovementComponent::CheckHasReachedFloor()
+{
+	const FVector DownVector = -UpdatedComponent->GetUpVector();
+	const FVector StartOffset = DownVector * 50.f;
+
+	const FVector Start = UpdatedComponent->GetComponentLocation() + StartOffset;
+	const FVector End = Start + DownVector;
+
+	TArray<FHitResult> PossibleFloorHits = DoCapsuleTraceMultiByObject(Start, End);
+
+	if (PossibleFloorHits.IsEmpty()) return false;
+
+	for (const FHitResult& PossibleFloorHit : PossibleFloorHits) 
 	{
-		return true;
+		const bool bFloorReached=
+		FVector::Parallel(-PossibleFloorHit.ImpactNormal, FVector::UpVector) &&
+		GetUnrotatedClimbVelocity().Z < -10.f;
+
+		if(bFloorReached)
+		{
+			return true;
+		}
 	}
+
 	return false;
 }
 
@@ -305,6 +362,28 @@ void UCustomMovementComponent::SnapMovementToClimbableSurfaces(float DeltaTime)
 		true);
 }
 
+bool UCustomMovementComponent::CheckHasReachedLedge()
+{
+	FHitResult LedgetHitResult = TraceFormEyeHeight(100.f,50.f);
+
+	if(!LedgetHitResult.bBlockingHit)
+	{
+		const FVector WalkableSurfaceTraceStart = LedgetHitResult.TraceEnd;
+		const FVector DownVector = -UpdatedComponent->GetUpVector();
+		const FVector WalkableSurfaceTraceEnd = WalkableSurfaceTraceStart + DownVector * 100.f;
+
+		FHitResult WalkableSurfaceHitResult=
+		DoLineTraceSingleByObject(WalkableSurfaceTraceStart, WalkableSurfaceTraceEnd, true);
+
+		if(WalkableSurfaceHitResult.bBlockingHit && GetUnrotatedClimbVelocity().Z > 10.f)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool UCustomMovementComponent::IsClimbing() const
 {
 
@@ -333,7 +412,7 @@ FHitResult UCustomMovementComponent::TraceFormEyeHeight(float TraceDistance, flo
 	const FVector End = Start + UpdatedComponent->GetForwardVector() * TraceDistance;
 
 
-	return DoLineTraceSingleByObject(Start, End);
+	return DoLineTraceSingleByObject(Start, End,true);
 }
 
 void UCustomMovementComponent::PlayClimbMontage(UAnimMontage* MontageToPlay)
