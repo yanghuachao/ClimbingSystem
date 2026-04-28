@@ -56,6 +56,8 @@ private:
 
 	bool CanStartClimbing();
 
+	bool CanClimbDownLedge();
+
 	void StartClimbing();
 
 	void StopClimbing();
@@ -112,6 +114,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
 	float MaxClimbAcceleration = 300.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
+	float ClimbDownWalkableSurfaceTrace = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
+	float ClimbDownLedgeSurfaceOffset = 50.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* IdleToClimbMontage;
