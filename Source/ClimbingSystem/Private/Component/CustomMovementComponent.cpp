@@ -29,7 +29,6 @@ void UCustomMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	/*CanClimbDownLedge();*/
 }
 
 void UCustomMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
@@ -320,8 +319,8 @@ void UCustomMovementComponent::ProcessClimbableSurfaceInfo()
 	CurrentClimbableSurfaceLocation /= ClimbableSurfacesTracedResults.Num();
 	CurrentClimbableSurfaceNormal = CurrentClimbableSurfaceNormal.GetSafeNormal();
 
-	Debug::Print(TEXT("ClimbableSurfaceLocation:") + CurrentClimbableSurfaceLocation.ToCompactString(), FColor::Cyan, 1);
-	Debug::Print(TEXT("ClimbableSurfaceNormal:") + CurrentClimbableSurfaceNormal.ToCompactString(), FColor::Red, 2);
+	/*Debug::Print(TEXT("ClimbableSurfaceLocation:") + CurrentClimbableSurfaceLocation.ToCompactString(), FColor::Cyan, 1);
+	Debug::Print(TEXT("ClimbableSurfaceNormal:") + CurrentClimbableSurfaceNormal.ToCompactString(), FColor::Red, 2);*/
 }
 
 bool UCustomMovementComponent::CheckShouldStopClimbing()
@@ -547,6 +546,30 @@ void UCustomMovementComponent::OnClimbMontageEnded(UAnimMontage* Montage, bool b
 	if(Montage == ClimbToTopMontage || Montage == VaultMontage)
 	{
 		SetMovementMode(MOVE_Walking);
+	}
+}
+
+void UCustomMovementComponent::RequestHopping()
+{
+	const FVector UnrotatedLastInputVector=
+	UKismetMathLibrary::Quat_UnrotateVector(UpdatedComponent->GetComponentQuat(), GetLastInputVector());
+
+	const float DotResult=
+	FVector::DotProduct(UnrotatedLastInputVector.GetSafeNormal(), FVector::UpVector);
+
+	Debug::Print(TEXT("Dot result") + FString::SanitizeFloat(DotResult));
+
+	if(DotResult>=0.9f)
+	{
+		Debug::Print(TEXT("Hop Up"));
+	}
+	else if(DotResult <=-0.9f)
+	{
+		Debug::Print(TEXT("Hop Down"));
+	}
+	else
+	{
+		Debug::Print(TEXT("Invalid Input Range"));
 	}
 }
 
