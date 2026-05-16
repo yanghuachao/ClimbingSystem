@@ -60,7 +60,7 @@ private:
 
 	bool TraceClimbableSurfaces();
 
-	FHitResult TraceFormEyeHeight(float TraceDistance, float TraceStartOffset = 0.f);
+	FHitResult TraceFormEyeHeight(float TraceDistance, float TraceStartOffset = 0.f, bool bShowDebugShape = false,bool bDrawPersistantShapes=false);
 
 	bool CanStartClimbing();
 
@@ -95,6 +95,9 @@ private:
 
 	void SetMotionWarpTarget(const FName& InWarpTargetName, const FVector& InTargetPosition);
 	
+	void HandleHopUp();
+
+	bool CheckCanHopUp(FVector& OutHopUpTargetPosition);
 
 #pragma endregion
 
@@ -150,6 +153,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* VaultMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement:Climbing",meta=(AllowPrivateAccess="true"))
+	UAnimMontage* HopUpMontage;
 
 #pragma endregion
 
