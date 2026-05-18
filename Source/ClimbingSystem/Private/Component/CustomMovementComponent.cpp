@@ -469,7 +469,7 @@ bool UCustomMovementComponent::CanStartVaulting(FVector& OutVaultStartPosition, 
 	for(int32 i=0;i<5;i++)
 	{
 		const FVector Start = ComponentLocation + UpVector * 100.f + 
-		ComponentForword * 100.f * (i + 1);
+		ComponentForword * 80.f * (i + 1);
 
 		const FVector End = Start + DownVector * 100.f * (i + 1);
 
@@ -570,11 +570,10 @@ void UCustomMovementComponent::RequestHopping()
 	else if(DotResult <=-0.9f)
 	{
 		Debug::Print(TEXT("Hop Down"));
+
+		HandleHopDown();
 	}
-	else
-	{
-		Debug::Print(TEXT("Invalid Input Range"));
-	}
+	
 }
 
 void UCustomMovementComponent::SetMotionWarpTarget(const FName& InWarpTargetName, const FVector& InTargetPosition)
@@ -603,8 +602,8 @@ void UCustomMovementComponent::HandleHopUp()
 bool UCustomMovementComponent::CheckCanHopUp(FVector& OutHopUpTargetPosition)
 {
 
-	FHitResult HopUpHit = TraceFormEyeHeight(100.f,-30.f,true,true);
-	FHitResult SatfLedgeHit = TraceFormEyeHeight(100.f,150.f, true,true);
+	FHitResult HopUpHit = TraceFormEyeHeight(100.f,-30.f);
+	FHitResult SatfLedgeHit = TraceFormEyeHeight(100.f,150.f);
 
 	if(HopUpHit.bBlockingHit&&SatfLedgeHit.bBlockingHit)
 	{
@@ -612,6 +611,30 @@ bool UCustomMovementComponent::CheckCanHopUp(FVector& OutHopUpTargetPosition)
 		return true;
 	}
 
+	return false;
+}
+
+void UCustomMovementComponent::HandleHopDown()
+{
+	FVector HopDownTargetPoint;
+	if(CheckCanHopDown(HopDownTargetPoint))
+	{
+		SetMotionWarpTarget(FName("HopDownTargetPoint"), HopDownTargetPoint);
+
+		PlayClimbMontage(HopDownMontage);
+	}
+	
+}
+
+bool UCustomMovementComponent::CheckCanHopDown(FVector& OutHopDownTargetPosition)
+{
+	FHitResult HopDownHit = TraceFormEyeHeight(100.f, -300.f);
+
+	if(HopDownHit.bBlockingHit)
+	{
+		OutHopDownTargetPosition = HopDownHit.ImpactPoint;
+		return true;
+	}
 	return false;
 }
 
